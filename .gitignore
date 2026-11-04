@@ -1,0 +1,13 @@
+# Recordings and exported presets made while trying the app
+*.wav
+*.webm
+*.m4a
+*.fakemax.json
+
+# Personal Claude Code settings (launch.json is shared)
+.claude/settings.local.json
+
+# OS clutter
+Thumbs.db
+desktop.ini
+.DS_Store

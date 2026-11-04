@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FakeMax</title>
+  <meta name="description" content="A generative orchestral composer: layers of strings, piano, harp and winds that write themselves.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="stage" aria-hidden="true"></canvas>
+
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">
+        <h1>FakeMax</h1>
+        <p>a generative orchestra</p>
+      </div>
+      <div class="transport">
+        <button id="play" class="play" aria-label="Play">
+          <svg viewBox="0 0 24 24" class="i-play"><path d="M8 5v14l11-7z"/></svg>
+          <svg viewBox="0 0 24 24" class="i-stop"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+        </button>
+        <div class="now">
+          <div id="chord" class="chord">—</div>
+          <div id="keyline" class="keyline"></div>
+        </div>
+      </div>
+    </header>
+
+    <div id="loading" class="loading" hidden>
+      <div class="bar"><span id="loadbar"></span></div>
+      <span id="loadtext">Loading samples…</span>
+    </div>
+
+    <section class="moods" aria-label="Moods">
+      <div id="moods" class="chips"></div>
+    </section>
+
+    <section class="composers" aria-label="Composer styles">
+      <button id="glassMe" class="style-btn glass" title="Adds a Glass-style layer: triplet piano, marimba figure, pulsing bass or clarinet figure">
+        <b>Glass me</b><small>add pulse &amp; repetition</small>
+      </button>
+      <button id="maxMe" class="style-btn max" title="Adds a Richter-style layer: solo violin, sinking cello line, swelling strings or slow piano">
+        <b>Max me</b><small>add something aching</small>
+      </button>
+      <button id="enoMe" class="style-btn eno" title="Adds an Eno-style Drift loop with its own length">
+        <b>Eno me</b><small>add a drifting loop</small>
+      </button>
+      <button id="undo" class="btn ghost undo" disabled title="Undo the last Glass / Max / Eno change">↶ Undo</button>
+      <label class="withstyle"><input id="withStyle" type="checkbox"> Also change key, chords &amp; tempo to suit</label>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <section class="piece panel" aria-label="Piece settings">
+      <label>Key
+        <select id="key"></select>
+      </label>
+      <label>Mode
+        <select id="mode">
+          <option value="minor">Minor</option>
+          <option value="dorian">Dorian</option>
+          <option value="major">Major</option>
+          <option value="lydian">Lydian</option>
+        </select>
+      </label>
+      <label class="grow">Tempo <output id="bpmOut"></output>
+        <input id="bpm" type="range" min="36" max="140" step="1">
+      </label>
+      <label>Chords every
+        <select id="chordBars">
+          <option value="1">1 bar</option>
+          <option value="2">2 bars</option>
+          <option value="4">4 bars</option>
+        </select>
+      </label>
+      <label class="grow">Evolve <output id="evolveOut"></output>
+        <input id="evolve" type="range" min="0" max="1" step="0.01">
+      </label>
+      <button id="surprise" class="btn ghost" title="New key, tempo and progression, and re-roll every layer">🎲 Surprise me</button>
+    </section>
+
+    <section id="layers" class="layers" aria-label="Layers"></section>
+
+    <section class="bottom">
+      <div class="panel group">
+        <h2>Presets</h2>
+        <div class="row">
+          <select id="presetList" aria-label="Saved presets"></select>
+          <button id="presetLoad" class="btn">Load</button>
+          <button id="presetSave" class="btn">Save…</button>
+          <button id="presetDelete" class="btn ghost" title="Delete selected preset">Delete</button>
+        </div>
+        <div class="row">
+          <button id="presetExport" class="btn ghost">Export file</button>
+          <label class="btn ghost file">Import file<input id="presetImport" type="file" accept=".json,application/json"></label>
+        </div>
+      </div>
+
+      <div class="panel group">
+        <h2>Record</h2>
+        <div class="row">
+          <button id="record" class="btn rec"><span class="recdot"></span><span id="recLabel">Record</span></button>
+          <span id="recTime" class="mono">0:00</span>
+        </div>
+        <p class="hint">Saves what you hear as a WAV file when you stop.</p>
+      </div>
+
+      <div class="panel group">
+        <h2>Output</h2>
+        <div class="row">
+          <select id="output" aria-label="Output">
+            <option value="audio">Built-in samples</option>
+            <option value="both">Samples + MIDI</option>
+            <option value="midi">MIDI only (DAW)</option>
+          </select>
+          <select id="midiPort" aria-label="MIDI port" hidden></select>
+        </div>
+        <p id="midiHint" class="hint">Send each layer to Logic, MainStage or Cubase on its own MIDI channel, to play Spitfire or any orchestral plugin.</p>
+      </div>
+
+      <div class="panel group">
+        <h2>Samples</h2>
+        <label class="check"><input id="preload" type="checkbox"> Preload every instrument in the background</label>
+        <div class="row preload-status">
+          <div class="bar"><span id="preloadBar"></span></div>
+          <span id="preloadText" class="mono"></span>
+        </div>
+        <p class="hint">Then any instrument you pick plays instantly. About 180 MB to download and 400 MB of memory, so it's off by default on phones and tablets.</p>
+      </div>
+    </section>
+
+    <footer class="credits">
+      Samples: <a href="https://github.com/sgossner/VSCO-2-CE" target="_blank" rel="noopener">VSCO 2 Community Edition</a> (CC0) by Versilian Studios · Audio: Tone.js
+    </footer>
+  </main>
+
+  <template id="cardTpl">
+    <article class="card">
+      <header>
+        <span class="pulse"></span>
+        <div class="titles">
+          <span class="type"></span>
+          <span class="blurb"></span>
+        </div>
+        <span class="badge" hidden></span>
+      </header>
+      <select class="instrument" aria-label="Instrument"></select>
+      <div class="knobs"></div>
+      <div class="mix">
+        <label>Vol<input type="range" data-k="volume" min="0" max="1" step="0.01"></label>
+        <label>Pan<input type="range" data-k="pan" min="-1" max="1" step="0.01"></label>
+        <label>Space<input type="range" data-k="reverb" min="0" max="1" step="0.01"></label>
+      </div>
+      <footer>
+        <button class="tog mute" title="Mute">M</button>
+        <button class="tog solo" title="Solo">S</button>
+        <button class="tog dice" title="Re-roll this layer">🎲</button>
+        <button class="tog dup" title="Duplicate this layer">⧉</button>
+        <button class="tog phase" title="Phase: add a copy that plays the same notes but slowly drifts out of step (Steve Reich)">Phase</button>
+        <label class="midich" title="MIDI channel">ch <select></select></label>
+        <button class="tog remove" title="Remove layer">✕</button>
+      </footer>
+    </article>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/harmony.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/layers.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/recorder.js"></script>
+  <script src="js/composers.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
