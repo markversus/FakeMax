@@ -3,8 +3,10 @@
 Layers of real orchestral samples that write themselves, in the spirit of Max Richter and Philip Glass.
 It has Wotja-style layers and Eno-app-style simple controls.
 
-## Run it
-The browser needs to load the page from a small local server, not straight from the file:
+## Play it
+**Online:** https://markversus.github.io/FakeMax/ works on any device. MIDI out needs Chrome or Edge.
+
+**Locally:** the browser needs to load the page from a small local server, not straight from the file:
 
 ```
 powershell -ExecutionPolicy Bypass -File serve.ps1
