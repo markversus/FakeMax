@@ -104,11 +104,6 @@ function buildCard(layer) {
   };
   drawKnobs();
 
-  el.querySelectorAll('.mix input').forEach(input => {
-    input.value = layer[input.dataset.k];
-    input.oninput = () => { layer.set(input.dataset.k, +input.value); markCustom(); };
-  });
-
   const mute = el.querySelector('.mute'), solo = el.querySelector('.solo');
   const syncToggles = () => {
     mute.classList.toggle('on', layer.muted); solo.classList.toggle('on', layer.solo);
@@ -146,6 +141,26 @@ function buildCard(layer) {
   return el;
 }
 
+// Mixer: every layer's Vol / Pan / Space in one place, so the layer cards above can stay
+// focused on the musical controls.
+function buildChannel(layer) {
+  const el = $('#channelTpl').content.firstElementChild.cloneNode(true);
+  const def = layer.def;
+  el.dataset.type = layer.type;
+  const source = layer.isPhase() && Engine.layers.find(l => l.id === layer.p.follow);
+  el.querySelector('.chtype').textContent = source ? `${def.label} · Phase` : def.label;
+  el.querySelector('.chinst').textContent = InstrumentBank.get(layer.instrument).name;
+  el.querySelectorAll('.mix input').forEach(input => {
+    input.value = layer[input.dataset.k];
+    input.oninput = () => { layer.set(input.dataset.k, +input.value); markCustom(); };
+  });
+  return el;
+}
+
+function renderMixer() {
+  $('#mixerChannels').replaceChildren(...Engine.layers.map(buildChannel));
+}
+
 function addCard() {
   const el = document.createElement('div');
   el.className = 'addcard';
@@ -164,6 +179,7 @@ function renderLayers() {
   const host = $('#layers');
   host.replaceChildren(...Engine.layers.map(buildCard));
   if (Engine.layers.length < MAX_LAYERS) host.append(addCard());
+  renderMixer();
 }
 
 function freeMidiChannel() {

@@ -139,11 +139,11 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; bord
   border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 12px;
   transition: border-color .3s, opacity .3s;
 }
-.card[data-type=ostinato] { --c: var(--ostinato); }
-.card[data-type=melody] { --c: var(--melody); }
-.card[data-type=bass] { --c: var(--bass); }
-.card[data-type=sparkle] { --c: var(--sparkle); }
-.card[data-type=drift] { --c: var(--drift); }
+.card[data-type=ostinato], .channel[data-type=ostinato] { --c: var(--ostinato); }
+.card[data-type=melody], .channel[data-type=melody] { --c: var(--melody); }
+.card[data-type=bass], .channel[data-type=bass] { --c: var(--bass); }
+.card[data-type=sparkle], .channel[data-type=sparkle] { --c: var(--sparkle); }
+.card[data-type=drift], .channel[data-type=drift] { --c: var(--drift); }
 .card.muted { opacity: 0.45; }
 .card.soloed { border-color: var(--c); }
 .card header { display: flex; align-items: center; gap: 10px; }
@@ -187,6 +187,19 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; bord
 .addcard h3 { margin: 0 0 4px; font: italic 500 22px/1 'Cormorant Garamond', Georgia, serif; color: var(--muted); }
 .addcard .btn { text-align: left; }
 .addcard .btn i { font-style: normal; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+
+/* Mixer */
+.mixer { margin: 14px 0; }
+.mixer h2 { margin: 0 0 10px; font: italic 500 20px/1 'Cormorant Garamond', Georgia, serif; }
+.channels { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.channel {
+  --c: var(--pad); flex: 0 0 140px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), transparent 70%);
+  border: 1px solid var(--line); border-radius: 12px; padding: 10px;
+}
+.chlabel { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.chtype { font: italic 500 15px/1.1 'Cormorant Garamond', Georgia, serif; color: var(--c); }
+.chinst { color: var(--muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Bottom */
 .bottom { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
