@@ -105,12 +105,15 @@ function buildCard(layer) {
   drawKnobs();
 
   const mute = el.querySelector('.mute'), solo = el.querySelector('.solo');
+  // The mixer channel for this layer (linked below, once it's built) mirrors mute/solo state.
   const syncToggles = () => {
     mute.classList.toggle('on', layer.muted); solo.classList.toggle('on', layer.solo);
     el.classList.toggle('muted', layer.muted); el.classList.toggle('soloed', layer.solo);
+    el.channel?.sync();
   };
   mute.onclick = () => { layer.muted = !layer.muted; syncToggles(); };
   solo.onclick = () => { layer.solo = !layer.solo; syncToggles(); };
+  el.sync = syncToggles;
   syncToggles();
   el.querySelector('.dice').onclick = () => { layer.dice(); drawKnobs(); markCustom(); };
   el.querySelector('.remove').onclick = () => removeLayer(layer);
@@ -141,24 +144,36 @@ function buildCard(layer) {
   return el;
 }
 
-// Mixer: every layer's Vol / Pan / Space in one place, so the layer cards above can stay
-// focused on the musical controls.
-function buildChannel(layer) {
+// Mixer: a channel strip per layer, like a real desk — pan and reverb send as knobs,
+// volume as a vertical fader, with the same mute/solo as the layer's card (and in sync with it).
+function buildChannel(layer, card) {
   const el = $('#channelTpl').content.firstElementChild.cloneNode(true);
   const def = layer.def;
   el.dataset.type = layer.type;
   const source = layer.isPhase() && Engine.layers.find(l => l.id === layer.p.follow);
   el.querySelector('.chtype').textContent = source ? `${def.label} · Phase` : def.label;
   el.querySelector('.chinst').textContent = InstrumentBank.get(layer.instrument).name;
-  el.querySelectorAll('.mix input').forEach(input => {
-    input.value = layer[input.dataset.k];
-    input.oninput = () => { layer.set(input.dataset.k, +input.value); markCustom(); };
-  });
-  return el;
-}
 
-function renderMixer() {
-  $('#mixerChannels').replaceChildren(...Engine.layers.map(buildChannel));
+  el.querySelector('.chknobs').append(
+    knob('Pan', (layer.pan + 1) / 2, v => { layer.set('pan', v * 2 - 1); markCustom(); }),
+    knob('Space', layer.reverb, v => { layer.set('reverb', v); markCustom(); }),
+  );
+
+  const vol = el.querySelector('.vol');
+  vol.value = layer.volume;
+  vol.oninput = () => { layer.set('volume', +vol.value); markCustom(); };
+
+  const mute = el.querySelector('.mute'), solo = el.querySelector('.solo');
+  const syncToggles = () => {
+    mute.classList.toggle('on', layer.muted); solo.classList.toggle('on', layer.solo);
+    el.classList.toggle('muted', layer.muted); el.classList.toggle('soloed', layer.solo);
+  };
+  mute.onclick = () => { layer.muted = !layer.muted; card.sync(); };
+  solo.onclick = () => { layer.solo = !layer.solo; card.sync(); };
+  el.sync = syncToggles;
+  card.channel = el;
+  syncToggles();
+  return el;
 }
 
 function addCard() {
@@ -176,10 +191,16 @@ function addCard() {
 }
 
 function renderLayers() {
+  const cards = [], channels = [];
+  for (const layer of Engine.layers) {
+    const card = buildCard(layer);
+    cards.push(card);
+    channels.push(buildChannel(layer, card));
+  }
   const host = $('#layers');
-  host.replaceChildren(...Engine.layers.map(buildCard));
+  host.replaceChildren(...cards);
   if (Engine.layers.length < MAX_LAYERS) host.append(addCard());
-  renderMixer();
+  $('#mixerChannels').replaceChildren(...channels);
 }
 
 function freeMidiChannel() {

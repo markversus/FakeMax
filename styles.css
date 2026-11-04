@@ -162,8 +162,6 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; bord
 .knob .val { stroke: var(--c); }
 .knob .dot { fill: var(--text); }
 .knob span { font-size: 11px; color: var(--muted); }
-.mix { display: grid; gap: 2px; }
-.mix label { display: grid; grid-template-columns: 44px 1fr; align-items: center; color: var(--muted); font-size: 11px; }
 .card footer { display: flex; align-items: center; gap: 6px; }
 .tog {
   width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: transparent;
@@ -193,13 +191,26 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; bord
 .mixer h2 { margin: 0 0 10px; font: italic 500 20px/1 'Cormorant Garamond', Georgia, serif; }
 .channels { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
 .channel {
-  --c: var(--pad); flex: 0 0 140px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), transparent 70%);
+  --c: var(--pad); flex: 0 0 128px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), var(--panel) 65%);
   border: 1px solid var(--line); border-radius: 12px; padding: 10px;
+  display: flex; flex-direction: column; align-items: center; transition: border-color .3s, opacity .3s;
 }
-.chlabel { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.channel.muted { opacity: 0.45; }
+.channel.soloed { border-color: var(--c); }
+.chlabel { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 6px; text-align: center; width: 100%; }
 .chtype { font: italic 500 15px/1.1 'Cormorant Garamond', Georgia, serif; color: var(--c); }
-.chinst { color: var(--muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chinst { color: var(--muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.chknobs { display: flex; gap: 6px; }
+.chknobs .knob svg { width: 40px; height: 40px; }
+.chknobs .knob span { font-size: 9px; }
+.fader { margin: 10px 0; height: 120px; display: flex; align-items: center; }
+.fader input[type=range] {
+  writing-mode: vertical-lr; direction: rtl; -webkit-appearance: slider-vertical; appearance: slider-vertical;
+  width: 22px; height: 120px; margin: 0;
+}
+.fader input[type=range]::-webkit-slider-thumb { margin-left: -5.5px; }
+.chbuttons { display: flex; gap: 6px; }
 
 /* Bottom */
 .bottom { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
